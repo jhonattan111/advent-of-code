@@ -11,45 +11,53 @@ const char_to_array = () => {
   }
 };
 
+check_if_is_safe = (lvl) => {
+  let lower = 0,
+    higher = 0;
+  console.log("current loop", lvl);
+  let unsafe_loop = 0,
+    safe_loop = lvl.length;
+  for (let i = 0; i < lvl.length - 1; i++) {
+    let differece = lvl[i] - lvl[i + 1];
+    if (differece > 0) {
+      higher++;
+    } else if (differece < 0) {
+      lower++;
+    }
+
+    let distance = Math.abs(differece);
+    console.log("distance", distance);
+    if (distance == 0 || distance > 3 || (higher > 0 && lower > 0)) {
+      ++unsafe_loop;
+      --safe_loop;
+    }
+  }
+
+  return unsafe_loop == 0;
+};
+
+const try_possibilities = (lvl) => {
+  if (check_if_is_safe(lvl)) return true;
+  for (let i = 0; i < lvl.length; i++) {
+    let new_lvl = JSON.parse(JSON.stringify(lvl));
+    new_lvl.splice(i, 1);
+    if (check_if_is_safe(new_lvl)) return true;
+  }
+
+  return false;
+};
+
 const calculate_and_classify = () => {
   char_to_array();
   safe_reports = levels.length;
 
   for (let level of levels) {
-    let lower = 0,
-      higher = 0;
-    let canRemove = true;
-    console.log("current array", "\t", level);
-    for (let i = 0; i < level.length - 1; i++) {
-      console.log("i = ", i);
-      let differece = level[i] - level[i + 1];
-      if (differece > 0) {
-        higher++;
-      } else if (differece < 0) {
-        lower++;
-      }
+    let isSafe = try_possibilities(level);
 
-      let distance = Math.abs(differece);
-
-      if (distance == 0 || distance > 3 || (higher > 0 && lower > 0)) {
-        if (canRemove && distance < 4) {
-          canRemove = false;
-          console.log("old array", "\t", level);
-          level.splice(i, 1);
-          console.log("new array", "\t", level);
-          i = -1;
-          higher = 0;
-          lower = 0;
-          continue;
-        }
-
-        console.log("unsafe", "\t\t", level);
-
-        ++unsafe_reports;
-        --safe_reports;
-
-        break;
-      }
+    if (!isSafe) {
+      safe_reports--;
+      unsafe_reports++;
+      continue;
     }
   }
 };
